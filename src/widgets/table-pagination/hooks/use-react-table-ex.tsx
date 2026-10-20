@@ -6,6 +6,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -14,10 +15,10 @@ import { useTablePagination } from "../context/TablePaginationContext";
 
 interface Props<T> {
   data: T[];
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T, unknown>[];
   globalFilterFn?: FilterFnOption<T> | undefined;
   sorting?: SortingState | undefined;
-  onSortingChange?: (updater: any) => void;
+  onSortingChange?: OnChangeFn<SortingState>;
 }
 
 export function useReactTableEx<T>({

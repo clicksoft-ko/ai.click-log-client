@@ -18,14 +18,14 @@ import {
 } from "@/widgets/ui/select";
 import { useTablePagination } from "../context/TablePaginationContext";
 
-interface TablePaginationProps {
-  table: Table<any>;
+interface TablePaginationProps<T> {
+  table: Table<T>;
 }
 
-export const TablePagination = ({ table }: TablePaginationProps) => {
+export const TablePagination = <T,>({ table }: TablePaginationProps<T>) => {
   const { pageSize, setPageSize, pageIndex, setPageIndex } =
     useTablePagination();
-    
+
   return (
     <div className="relative flex items-center justify-center border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
       <div className="absolute right-4">

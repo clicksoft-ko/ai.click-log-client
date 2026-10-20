@@ -31,10 +31,8 @@ export function DatePickerRange({ className, onChange }: DatePickerRangeProps) {
       onChange?.({ from, to });
       return;
     }
-    let { from, to } = newDate;
-    if (!to) {
-      to = from;
-    }
+    const { from } = newDate;
+    const to = newDate.to ?? from;
 
     setDate({ from, to });
     onChange?.({ from, to });

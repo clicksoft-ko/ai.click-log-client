@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 interface HasScrollArgs {
-  deps?: any[];
+  deps?: unknown[];
 }
 
 const useHasScroll = ({ deps }: HasScrollArgs = {}) => {
