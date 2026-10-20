@@ -7,6 +7,5 @@ export const useStackTrace = (id: string) => {
     queryKey: [apiPaths.click.stacktrace(id)],
     queryFn: () => fetchStacktrace(id),
   });
-  console.log(data);  
   return { stackTrace: data?.stackTrace, ...props };
 };
