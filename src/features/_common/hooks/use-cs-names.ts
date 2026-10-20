@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { apiPaths } from "@/shared/paths/paths";
 import { fetchCsNames } from "..";
 
@@ -7,9 +8,10 @@ export const useCsNames = () => {
     queryKey: [apiPaths.cpm.csNames],
     queryFn: fetchCsNames,
   });
-  const csNames = data?.data || [];
-  const csNameMap = new Map(
-    csNames.map((csName) => [csName.code, csName.myung]),
+  const csNameMap = useMemo(
+    () =>
+      new Map((data?.data || []).map((csName) => [csName.code, csName.myung])),
+    [data],
   );
 
   return { data, csNameMap, ...props };

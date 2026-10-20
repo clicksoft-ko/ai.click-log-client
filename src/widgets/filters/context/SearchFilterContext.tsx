@@ -5,12 +5,10 @@ import { DateRange } from "react-day-picker";
 type States = {
   searchText: string;
   dateRange: DateRange;
-  isPending: boolean;
   excludedTags: string[];
   setExcludedTags: (value: string[]) => void;
   setDateRange: (value: DateRange) => void;
   setSearchText: (value: string) => void;
-  setIsPending: (value: boolean) => void;
 };
 
 const SearchFilterContext = createContext<States>({
@@ -19,12 +17,10 @@ const SearchFilterContext = createContext<States>({
     from: new Date(),
     to: new Date(),
   },
-  isPending: false,
   excludedTags: [],
   setExcludedTags: () => {},
   setDateRange: () => {},
   setSearchText: () => {},
-  setIsPending: () => {},
 });
 
 export function SearchFilterProvider({ children }: ChildrenProps) {
@@ -33,7 +29,6 @@ export function SearchFilterProvider({ children }: ChildrenProps) {
     from: new Date(),
     to: new Date(),
   });
-  const [isPending, setIsPending] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
 
   return (
@@ -42,9 +37,7 @@ export function SearchFilterProvider({ children }: ChildrenProps) {
         searchText,
         dateRange,
         excludedTags: tags,
-        isPending,
         setSearchText,
-        setIsPending,
         setExcludedTags: setTags,
         setDateRange,
       }}

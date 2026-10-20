@@ -3,12 +3,12 @@ import { useMemo, useState } from "react";
 import { ErrorLog } from "../models/types";
 import { format } from "date-fns";
 
+const columnHelper = createColumnHelper<ErrorLog>();
+
 export const useErrorLogsColumns = (
   csNameMap: Map<string, string> | undefined,
 ) => {
-  console.log(csNameMap);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const columnHelper = createColumnHelper<ErrorLog>();
   const columns = useMemo(
     () => [
       columnHelper.accessor("createdAt", {
@@ -46,7 +46,7 @@ export const useErrorLogsColumns = (
         cell: (info) => info.getValue(),
       }),
     ],
-    [columnHelper, csNameMap],
+    [csNameMap],
   );
 
   return { columns, sorting, setSorting };

@@ -8,7 +8,7 @@ import {
   useReactTableEx,
 } from "@/widgets/table-pagination";
 import BodyWrapper from "@/widgets/wappers/BodyWrapper";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useFetchSlowQueries from "../hooks/use-fetch-slow-queries";
 import { useSlowQueryColumns } from "../hooks/use-slow-query-columns";
 import { SlowQuery } from "../models/slow-query";
@@ -19,11 +19,15 @@ const SlowQueriesBody = () => {
   const { csNameMap } = useCsNames();
   const [open, setOpen] = useState(false);
   const { columns, sorting, setSorting } = useSlowQueryColumns(csNameMap);
+  const globalFilterFn = useMemo(
+    () => tableFilterFn.bind(null, csNameMap),
+    [csNameMap],
+  );
   const { data, isPending, mutate } = useFetchSlowQueries();
   const table = useReactTableEx({
     data: data ?? [],
     columns,
-    globalFilterFn: tableFilterFn.bind(null, csNameMap),
+    globalFilterFn,
     sorting,
     onSortingChange: setSorting,
   });
@@ -35,7 +39,7 @@ const SlowQueriesBody = () => {
           <div>슬로우 쿼리를 조회 중입니다.</div>
         </Loading>
       )}
-      <SearchFilter onSearch={mutate} />
+      <SearchFilter onSearch={mutate} isPending={isPending} />
       <CommonTable
         table={table}
         onRowClick={(data) => {
@@ -43,7 +47,11 @@ const SlowQueriesBody = () => {
           setOpen(true);
         }}
       />
-      <SlowQueryDialog isOpen={open} onOpenChange={setOpen} slowQuery={selectedData} />
+      <SlowQueryDialog
+        isOpen={open}
+        onOpenChange={setOpen}
+        slowQuery={selectedData}
+      />
       <TablePagination table={table} />
     </BodyWrapper>
   );

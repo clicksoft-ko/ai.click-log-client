@@ -1,6 +1,7 @@
 import { axiosClient } from "@/shared/api";
 import { apiPaths } from "@/shared/paths";
-import { loopDays } from "@/shared/utilities";
+import { DAILY_FETCH_CONCURRENCY } from "@/shared/constants/fetch";
+import { loopDays, mapWithConcurrency } from "@/shared/utilities";
 import { compareDesc } from "date-fns";
 import { ErrorLog } from "../models/types";
 
@@ -29,20 +30,24 @@ export const fetchErrorLogsByDate = async ({
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  const logs: ErrorLog[] = [];
+  // 일자별 요청을 병렬로 실행하되, 동시 요청 수는 제한 (DAILY_FETCH_CONCURRENCY 참고)
+  const days = Array.from(loopDays(start, end), (date) => new Date(date));
+  const dailyLogs = await mapWithConcurrency(
+    days,
+    DAILY_FETCH_CONCURRENCY,
+    (date) => {
+      const nextDate = new Date(date);
+      date.setHours(0, 0, 0);
+      nextDate.setHours(23, 59, 59);
 
-  for (const currentDate of loopDays(start, end)) {
-    const nextDate = new Date(currentDate);
-    currentDate.setHours(0, 0, 0);
-    nextDate.setHours(23, 59, 59);
+      return fetchErrorLogs({
+        startDate: date.toISOString(),
+        endDate: nextDate > end ? endDate : nextDate.toISOString(),
+      });
+    },
+  );
 
-    const dailyLogs = await fetchErrorLogs({
-      startDate: currentDate.toISOString(),
-      endDate: nextDate > end ? endDate : nextDate.toISOString(),
-    });
-
-    logs.push(...dailyLogs);
-  }
+  const logs = dailyLogs.flat();
   logs.sort((a, b) => compareDesc(a.createdAt, b.createdAt));
   return logs;
 };

@@ -8,7 +8,7 @@ import {
   useReactTableEx,
 } from "@/widgets/table-pagination";
 import BodyWrapper from "@/widgets/wappers/BodyWrapper";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useErrorLogsColumns } from "../hooks/use-error-logs-columns";
 import useFetchErrorLogs from "../hooks/use-fetch-error-logs";
 import { ErrorLog } from "../models/types";
@@ -18,12 +18,16 @@ export const ErrorLogsBody = () => {
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
   const { csNameMap } = useCsNames();
   const { columns, sorting, setSorting } = useErrorLogsColumns(csNameMap);
+  const globalFilterFn = useMemo(
+    () => tableFilterFn.bind(null, csNameMap),
+    [csNameMap],
+  );
   const { data, isPending, mutate } = useFetchErrorLogs();
 
   const table = useReactTableEx({
     data,
     columns,
-    globalFilterFn: tableFilterFn.bind(null, csNameMap),
+    globalFilterFn,
     sorting,
     onSortingChange: setSorting,
   });
@@ -35,7 +39,7 @@ export const ErrorLogsBody = () => {
           <div>에러 로그를 조회 중입니다.</div>
         </Loading>
       )}
-      <SearchFilter onSearch={mutate} />
+      <SearchFilter onSearch={mutate} isPending={isPending} />
       <CommonTable table={table} onRowClick={setSelectedLog} />
 
       {selectedLog && (

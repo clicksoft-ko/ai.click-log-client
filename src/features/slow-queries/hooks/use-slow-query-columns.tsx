@@ -3,11 +3,12 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { SlowQuery } from "../models/slow-query";
 
+const columnHelper = createColumnHelper<SlowQuery>();
+
 export const useSlowQueryColumns = (
   csNameMap: Map<string, string> | undefined,
 ) => {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const columnHelper = createColumnHelper<SlowQuery>();
   const columns = useMemo(
     () => [
       columnHelper.accessor("createdAt", {
@@ -47,7 +48,7 @@ export const useSlowQueryColumns = (
         ),
       }),
     ],
-    [columnHelper, csNameMap],
+    [csNameMap],
   );
 
   return { columns, sorting, setSorting };

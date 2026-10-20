@@ -9,6 +9,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { useDeferredValue } from "react";
 import { useTablePagination } from "../context/TablePaginationContext";
 
 interface Props<T> {
@@ -27,6 +28,8 @@ export function useReactTableEx<T>({
   onSortingChange,
 }: Props<T>) {
   const { searchText } = useSearchFilter();
+  // 입력은 즉시 반영하고, 대량 행 필터링은 낮은 우선순위로 처리
+  const deferredSearchText = useDeferredValue(searchText);
   const { pageSize, pageIndex, setPageIndex, setPageSize } =
     useTablePagination();
   const table = useReactTable({
@@ -37,7 +40,7 @@ export function useReactTableEx<T>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     state: {
-      globalFilter: searchText,
+      globalFilter: deferredSearchText,
       pagination: {
         pageSize,
         pageIndex,
