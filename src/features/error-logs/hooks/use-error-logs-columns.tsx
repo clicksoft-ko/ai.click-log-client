@@ -1,9 +1,9 @@
 import { createColumnHelper, SortingState } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { ErrorLog } from "../models/types";
+import { ErrorLogRow } from "../models/types";
 import { format } from "date-fns";
 
-const columnHelper = createColumnHelper<ErrorLog>();
+const columnHelper = createColumnHelper<ErrorLogRow>();
 
 export const useErrorLogsColumns = (
   csNameMap: Map<string, string> | undefined,
@@ -13,7 +13,22 @@ export const useErrorLogsColumns = (
     () => [
       columnHelper.accessor("createdAt", {
         header: "발생시간",
-        cell: (info) => format(info.getValue(), "yy-MM-dd HH:mm:ss"),
+        cell: (info) => {
+          const repeat = info.row.original.repeatCount ?? 1;
+          return (
+            <>
+              {format(info.getValue(), "yy-MM-dd HH:mm:ss")}
+              {repeat > 1 && (
+                <span
+                  title={`같은 컴퓨터에서 연달아 ${repeat}번 발생`}
+                  className="ml-1.5 rounded-full bg-slate-900 px-1.5 py-0.5 text-xs font-bold text-white"
+                >
+                  ×{repeat}
+                </span>
+              )}
+            </>
+          );
+        },
       }),
       columnHelper.accessor("ykiho", {
         header: "병원명",

@@ -3,6 +3,7 @@ import { Loading } from "@/widgets/loading";
 import { CircleAlert, X } from "lucide-react";
 import { useStackTrace } from "../hooks/use-stack-trace";
 import { ErrorLog } from "../models/types";
+import { levelBadgeClass } from "../utils/level-badge";
 import { parseStackTrace } from "../utils/parse-stack-trace";
 import { CallFlow, StackTraceView } from "./StackTrace";
 import { useEffect, useMemo } from "react";
@@ -13,21 +14,6 @@ interface ErrorLogDetailModalProps {
   csNameMap: Map<string, string> | undefined;
   onClose: () => void;
 }
-
-const levelBadgeClass = (level: string) => {
-  switch (level.toUpperCase()) {
-    case "FATAL":
-    case "ERROR":
-      return "bg-red-100 text-red-800";
-    case "WARN":
-    case "WARNING":
-      return "bg-amber-100 text-amber-800";
-    case "INFO":
-      return "bg-blue-100 text-blue-800";
-    default:
-      return "bg-slate-100 text-slate-700";
-  }
-};
 
 export const ErrorLogDetailModal = ({
   log,
