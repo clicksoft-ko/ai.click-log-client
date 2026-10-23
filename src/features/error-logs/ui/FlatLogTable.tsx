@@ -1,56 +1,40 @@
 import {
   CommonTable,
+  TableCard,
   TablePagination,
   useReactTableEx,
 } from "@/widgets/table-pagination";
-import { useMemo } from "react";
-import { useErrorLogsColumns } from "../hooks/use-error-logs-columns";
-import { ErrorLog } from "../models/types";
-import { collapseConsecutive } from "../utils/error-log-groups";
+import { ColumnDef, OnChangeFn, SortingState } from "@tanstack/react-table";
+import { ErrorLog, ErrorLogRow } from "../models/types";
 
 interface FlatLogTableProps {
-  /** 검색어까지 걸러진 최신순 로그 */
-  logs: ErrorLog[];
-  csNameMap: Map<string, string> | undefined;
-  collapse: boolean;
-  onCollapseChange: (collapse: boolean) => void;
+  /** 검색어까지 걸러지고 (필요하면) 접힌 최신순 행 */
+  rows: ErrorLogRow[];
+  columns: ColumnDef<ErrorLogRow, unknown>[];
+  // 탭을 오가도 정렬이 남도록 상태는 본문이 들고 있다
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
   onSelectLog: (log: ErrorLog) => void;
 }
 
 export const FlatLogTable = ({
-  logs,
-  csNameMap,
-  collapse,
-  onCollapseChange,
+  rows,
+  columns,
+  sorting,
+  onSortingChange,
   onSelectLog,
 }: FlatLogTableProps) => {
-  const { columns, sorting, setSorting } = useErrorLogsColumns(csNameMap);
-  const rows = useMemo(
-    () => (collapse ? collapseConsecutive(logs) : logs),
-    [logs, collapse],
-  );
-
   const table = useReactTableEx({
     data: rows,
     columns,
     sorting,
-    onSortingChange: setSorting,
-    manualFiltering: true,
+    onSortingChange,
   });
 
   return (
-    <>
-      <label className="inline-flex cursor-pointer items-center gap-2 self-start text-sm text-slate-700">
-        <input
-          type="checkbox"
-          checked={collapse}
-          onChange={(e) => onCollapseChange(e.target.checked)}
-          className="h-4 w-4 accent-slate-900"
-        />
-        같은 컴퓨터에서 연달아 난 같은 오류는 한 줄로 접기
-      </label>
+    <TableCard>
       <CommonTable table={table} onRowClick={onSelectLog} />
       <TablePagination table={table} />
-    </>
+    </TableCard>
   );
 };

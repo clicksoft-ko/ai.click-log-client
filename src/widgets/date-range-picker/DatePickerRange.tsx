@@ -46,7 +46,7 @@ export function DatePickerRange({ className, onChange }: DatePickerRangeProps) {
             id="date"
             variant={"outline"}
             className={cn(
-              "w-[300px] justify-start text-left font-normal",
+              "h-9 justify-start gap-2 border-line-strong px-3 text-left text-[13px] font-normal tabular-nums text-ink [&_svg]:text-ink-2",
               !date && "text-muted-foreground",
             )}
           >
@@ -54,7 +54,7 @@ export function DatePickerRange({ className, onChange }: DatePickerRangeProps) {
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "yyyy-MM-dd", { locale: ko })} -{" "}
+                  {format(date.from, "yyyy-MM-dd", { locale: ko })} ~{" "}
                   {format(date.to, "yyyy-MM-dd", { locale: ko })}
                 </>
               ) : (

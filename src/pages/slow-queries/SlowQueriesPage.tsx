@@ -5,7 +5,7 @@ import { TablePaginationProvider } from "@/widgets/table-pagination";
 
 export const SlowQueriesPage = () => {
   return (
-    <PageLayout title="Slow Queries">
+    <PageLayout title="슬로우 쿼리">
       <SearchFilterProvider>
         <TablePaginationProvider>
           <SlowQueriesBody />

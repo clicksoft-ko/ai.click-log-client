@@ -2,9 +2,9 @@ export const levelBadgeClass = (level: string) => {
   switch (level.toUpperCase()) {
     case "FATAL":
     case "CRITICAL":
-      return "bg-red-900 text-white";
+      return "bg-crit text-white";
     case "ERROR":
-      return "bg-red-100 text-red-800";
+      return "bg-[#FDECEA] text-[#B42318]";
     case "WARN":
     case "WARNING":
       return "bg-amber-100 text-amber-800";
@@ -14,3 +14,7 @@ export const levelBadgeClass = (level: string) => {
       return "bg-slate-100 text-slate-700";
   }
 };
+
+/** 요약 그래프 계열: 0 = ERROR 등, 1 = CRITICAL·FATAL */
+export const isCriticalLevel = (level: string) =>
+  ["CRITICAL", "FATAL"].includes(level.toUpperCase());

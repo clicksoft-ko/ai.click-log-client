@@ -81,10 +81,10 @@
   }
 
   html {
-    @apply font-nanum-round text-base;        
+    @apply font-sans text-base;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-ground text-[13px] text-ink;
   }
 }

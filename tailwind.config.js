@@ -18,11 +18,31 @@ module.exports = {
   	},
   	extend: {
   		fontFamily: {
+  			sans: ['"IBM Plex Sans KR"', 'system-ui', 'sans-serif'],
+  			mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
   			'left-hand': ["Left Hand", "sans-serif"],
   			'nanum-round': ["NanumSquareRoundR", "sans-serif"],
   			'nanum-pen': ["NanumPen", "sans-serif"]
   		},
   		colors: {
+  			// 로그 모니터 화면 토큰
+  			ink: {
+  				DEFAULT: '#141A24',
+  				2: '#4A5363',
+  				3: '#5F6878'
+  			},
+  			navy: {
+  				DEFAULT: '#16223D',
+  				2: '#22325A'
+  			},
+  			ground: '#EEF1F5',
+  			line: {
+  				DEFAULT: '#DFE3EA',
+  				soft: '#EEF1F5',
+  				strong: '#CDD3DD'
+  			},
+  			panel: '#F6F8FB',
+  			crit: '#A3122A',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

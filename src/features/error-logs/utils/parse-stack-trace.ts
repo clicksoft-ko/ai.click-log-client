@@ -1,3 +1,5 @@
+import { isAppCode } from "@/shared/constants/framework";
+
 export interface StackFrame {
   kind: "frame";
   /** 스택 안에서의 프레임 순번 (1부터) */
@@ -24,9 +26,6 @@ export type StackLine = StackFrame | StackText;
 const FRAME_PATTERN =
   /^\s*(?:위치:|at)\s+(.+?)(?:\s+(?:파일|in)\s+(.+):(?:줄|line)\s+(\d+))?\s*$/;
 const SIGNATURE_PATTERN = /^(.*\.)([^.(]+)(\(.*\))$/;
-// 프레임워크와 흔한 서드파티 라이브러리. 여기에 해당하지 않으면 우리 코드로 본다
-const FRAMEWORK_PATTERN =
-  /^(System|Microsoft|MS\.Internal|Mono|FarPoint|DevExpress|Newtonsoft|Npgsql|MySql|Oracle|log4net|NLog|Telerik|Infragistics|C1|Dapper|Castle|Autofac)\./;
 
 export const parseStackTrace = (stackTrace: string): StackLine[] => {
   let no = 0;
@@ -49,7 +48,7 @@ export const parseStackTrace = (stackTrace: string): StackLine[] => {
         method: parts ? parts[2] : signature,
         args: parts ? parts[3] : "",
         location: file ? `${file}:${lineNumber}` : undefined,
-        isApp: !FRAMEWORK_PATTERN.test(signature),
+        isApp: isAppCode(signature),
       };
     });
 };

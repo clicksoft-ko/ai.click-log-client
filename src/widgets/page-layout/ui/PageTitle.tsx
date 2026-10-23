@@ -3,5 +3,5 @@ interface PageTitleProps {
 }
 
 export const PageTitle = ({ children }: PageTitleProps) => (
-  <h1 className="text-2xl font-bold mb-6">{children}</h1>
-); 
+  <h1 className="text-xl font-semibold tracking-tight">{children}</h1>
+);

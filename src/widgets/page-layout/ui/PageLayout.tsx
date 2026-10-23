@@ -1,6 +1,5 @@
 import React from "react";
 import { PageTitle } from "./PageTitle";
-import { PageBody } from "./PageBody";
 
 interface PageLayoutProps extends React.PropsWithChildren {
   title: React.ReactNode;
@@ -8,9 +7,9 @@ interface PageLayoutProps extends React.PropsWithChildren {
 
 export const PageLayout = ({ children, title }: PageLayoutProps) => {
   return (
-    <div className="p-8 min-w-[80rem]">
+    <div className="flex min-w-[64rem] flex-col gap-3 px-6 pb-6 pt-5">
       <PageTitle>{title}</PageTitle>
-      <PageBody>{children}</PageBody>
+      {children}
     </div>
   );
 };
