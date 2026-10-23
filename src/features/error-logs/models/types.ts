@@ -8,8 +8,6 @@ export interface ErrorLog {
   hospitalName: string;
   computerName: string;
   ykiho: string;
-  source: string;
-  additionalData: string;
   clientVersion: string;
   stackTrace: string;
 }
