@@ -108,11 +108,26 @@ module.exports = {
   				to: {
   					height: '0'
   				}
+  			},
+  			shimmer: {
+  				'100%': {
+  					transform: 'translateX(100%)'
+  				}
+  			},
+  			'loading-bar': {
+  				'0%': {
+  					transform: 'translateX(-100%)'
+  				},
+  				'100%': {
+  					transform: 'translateX(250%)'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			shimmer: 'shimmer 1.6s ease-in-out infinite',
+  			'loading-bar': 'loading-bar 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite'
   		}
   	}
   },

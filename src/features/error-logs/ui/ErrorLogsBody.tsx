@@ -1,12 +1,12 @@
 import { useCsNames } from "@/features/_common";
 import { SearchFilter, useSearchFilter } from "@/widgets/filters";
-import { Loading } from "@/widgets/loading";
+import { SkeletonRows } from "@/widgets/loading";
 import {
   countByHour,
   futureHourFrom,
   SummaryBand,
 } from "@/widgets/summary-band";
-import { useTablePagination } from "@/widgets/table-pagination";
+import { TableCard, useTablePagination } from "@/widgets/table-pagination";
 import {
   CheckOption,
   SegmentedControl,
@@ -100,19 +100,22 @@ export const ErrorLogsBody = () => {
     };
   }, [logs]);
 
+  // 조회 중에는 건수 대신 빈 자리를 둔다 (0건으로 보이지 않게)
+  const count = (value: number) => (isPending ? undefined : value);
+
   const tabs: ViewTab<ViewMode>[] = [
-    { value: "flat", label: "전체 로그", count: logs.length },
+    { value: "flat", label: "전체 로그", count: count(logs.length) },
     {
       value: "error",
       label: "오류별 묶음",
-      count: summary.errorKinds,
+      count: count(summary.errorKinds),
       title:
         "모듈 · 예외 타입 · 메시지가 같으면 한 묶음입니다. 메시지 속 IP·긴 숫자는 같은 값으로 봅니다.",
     },
     {
       value: "hospital",
       label: "병원별 묶음",
-      count: summary.hospitals,
+      count: count(summary.hospitals),
       title: "병원마다 어떤 오류가 몇 대의 컴퓨터에서 났는지 봅니다.",
     },
   ];
@@ -124,11 +127,6 @@ export const ErrorLogsBody = () => {
 
   return (
     <BodyWrapper>
-      {isPending && (
-        <Loading>
-          <div>에러 로그를 조회 중입니다.</div>
-        </Loading>
-      )}
       <SearchFilter
         onSearch={mutate}
         isPending={isPending}
@@ -152,6 +150,7 @@ export const ErrorLogsBody = () => {
         series={HOUR_SERIES}
         futureFrom={futureHourFrom(dateRange)}
         latestAt={logs[0]?.createdAt}
+        isLoading={isPending}
       />
 
       <ViewTabs tabs={tabs} value={view} onChange={changeView}>
@@ -207,9 +206,15 @@ export const ErrorLogsBody = () => {
           sorting={sorting}
           onSortingChange={setSorting}
           onSelectLog={setSelectedLog}
+          isLoading={isPending}
         />
       )}
-      {view === "error" && (
+      {view !== "flat" && isPending && (
+        <TableCard isLoading loadingLabel="에러 로그를 불러오는 중입니다.">
+          <SkeletonRows />
+        </TableCard>
+      )}
+      {view === "error" && !isPending && (
         <ErrorGroupList
           logs={logs}
           hospitalName={hospitalName}
@@ -218,7 +223,7 @@ export const ErrorLogsBody = () => {
           onSelectLog={setSelectedLog}
         />
       )}
-      {view === "hospital" && (
+      {view === "hospital" && !isPending && (
         <HospitalGroupList
           logs={logs}
           hospitalName={hospitalName}

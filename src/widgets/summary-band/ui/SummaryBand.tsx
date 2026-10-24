@@ -1,4 +1,5 @@
 import { cn } from "@/shared/utils";
+import { Skeleton } from "@/widgets/loading";
 import { format } from "date-fns";
 
 export interface SummaryStat {
@@ -25,10 +26,17 @@ interface SummaryBandProps {
   latestAt?: Date;
   /** 가장 많은 시간의 막대를 다른 색으로 (계열이 하나일 때) */
   peakBarClassName?: string;
+  /** 조회 중이면 숫자·막대 자리에 빈 막대를 보인다 */
+  isLoading?: boolean;
 }
 
 const BAR_HEIGHT = 56;
 const AXIS_HOURS = [0, 6, 12, 18];
+// 조회 중 막대 자리 (하루 흐름처럼 낮에 높게)
+const SKELETON_BARS = Array.from(
+  { length: 24 },
+  (_, hour) => `${Math.round(18 + 52 * Math.sin((Math.PI * hour) / 23))}%`,
+);
 
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
 
@@ -51,6 +59,7 @@ export const SummaryBand = ({
   futureFrom,
   latestAt,
   peakBarClassName,
+  isLoading = false,
 }: SummaryBandProps) => {
   const totals = hours.map(sum);
   const max = Math.max(...totals);
@@ -64,19 +73,25 @@ export const SummaryBand = ({
       <div className="grid grid-cols-[repeat(auto-fit,minmax(84px,1fr))] items-center gap-2 border-b border-line px-[18px] py-3.5 lg:border-b-0 lg:border-r">
         {stats.map((stat) => (
           <div key={stat.label} className="flex flex-col gap-0.5">
-            <span
-              className={cn(
-                "text-[22px] font-semibold tabular-nums leading-tight tracking-tight",
-                stat.valueClassName,
-              )}
-            >
-              {stat.value}
-              {stat.unit && (
-                <span className="ml-0.5 text-[13px] font-medium">
-                  {stat.unit}
-                </span>
-              )}
-            </span>
+            {isLoading ? (
+              <span className="flex h-[27.5px] items-center">
+                <Skeleton className="h-5 w-12" />
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  "text-[22px] font-semibold tabular-nums leading-tight tracking-tight",
+                  stat.valueClassName,
+                )}
+              >
+                {stat.value}
+                {stat.unit && (
+                  <span className="ml-0.5 text-[13px] font-medium">
+                    {stat.unit}
+                  </span>
+                )}
+              </span>
+            )}
             <span className="text-xs text-ink-3">{stat.label}</span>
           </div>
         ))}
@@ -85,9 +100,11 @@ export const SummaryBand = ({
       <figure
         role="img"
         aria-label={
-          peakHour < 0
-            ? "시간대별 발생 건수가 없습니다."
-            : `시간대별 발생 건수. 가장 많은 시간은 ${peakHour}시 ${max.toLocaleString()}건입니다.`
+          isLoading
+            ? "시간대별 발생 건수를 불러오는 중입니다."
+            : peakHour < 0
+              ? "시간대별 발생 건수가 없습니다."
+              : `시간대별 발생 건수. 가장 많은 시간은 ${peakHour}시 ${max.toLocaleString()}건입니다.`
         }
         className="flex flex-col gap-1.5 px-[18px] py-3"
       >
@@ -126,45 +143,61 @@ export const SummaryBand = ({
           aria-hidden
           className="grid h-14 grid-cols-[repeat(24,minmax(0,1fr))] items-end gap-[3px] border-b border-line"
         >
-          {hours.map((values, hour) => {
-            // 아직 오지 않은 시간 (조회 뒤 날짜만 바꾼 경우에도 실제 막대는 그대로 둔다)
-            const total = totals[hour];
-            if (futureFrom !== undefined && hour >= futureFrom && total === 0) {
+          {isLoading &&
+            SKELETON_BARS.map((height, hour) => (
+              <Skeleton
+                key={hour}
+                className="rounded-b-none rounded-t-sm"
+                height={height}
+              />
+            ))}
+          {!isLoading &&
+            hours.map((values, hour) => {
+              // 아직 오지 않은 시간 (조회 뒤 날짜만 바꾼 경우에도 실제 막대는 그대로 둔다)
+              const total = totals[hour];
+              if (
+                futureFrom !== undefined &&
+                hour >= futureFrom &&
+                total === 0
+              ) {
+                return (
+                  <div
+                    key={hour}
+                    className="border-t border-dashed border-line-strong"
+                  />
+                );
+              }
+              if (total === 0) return <div key={hour} />;
+              const height = Math.max(
+                2,
+                Math.round((total / max) * BAR_HEIGHT),
+              );
+              const breakdown =
+                series.length > 1
+                  ? ` (${series.map((s, i) => `${s.label} ${values[i]}`).join(", ")})`
+                  : "";
               return (
                 <div
                   key={hour}
-                  className="border-t border-dashed border-line-strong"
-                />
+                  title={`${hour}시 ${total.toLocaleString()}건${breakdown}`}
+                  className="flex flex-col overflow-hidden rounded-t-sm"
+                >
+                  {splitHeights(values, height).map((h, i) =>
+                    h > 0 ? (
+                      <div
+                        key={i}
+                        style={{ height: h }}
+                        className={
+                          hour === peakHour && peakBarClassName
+                            ? peakBarClassName
+                            : series[i].barClassName
+                        }
+                      />
+                    ) : null,
+                  )}
+                </div>
               );
-            }
-            if (total === 0) return <div key={hour} />;
-            const height = Math.max(2, Math.round((total / max) * BAR_HEIGHT));
-            const breakdown =
-              series.length > 1
-                ? ` (${series.map((s, i) => `${s.label} ${values[i]}`).join(", ")})`
-                : "";
-            return (
-              <div
-                key={hour}
-                title={`${hour}시 ${total.toLocaleString()}건${breakdown}`}
-                className="flex flex-col overflow-hidden rounded-t-sm"
-              >
-                {splitHeights(values, height).map((h, i) =>
-                  h > 0 ? (
-                    <div
-                      key={i}
-                      style={{ height: h }}
-                      className={
-                        hour === peakHour && peakBarClassName
-                          ? peakBarClassName
-                          : series[i].barClassName
-                      }
-                    />
-                  ) : null,
-                )}
-              </div>
-            );
-          })}
+            })}
         </div>
         <div
           aria-hidden

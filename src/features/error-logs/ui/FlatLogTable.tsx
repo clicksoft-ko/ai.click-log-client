@@ -15,6 +15,7 @@ interface FlatLogTableProps {
   sorting: SortingState;
   onSortingChange: OnChangeFn<SortingState>;
   onSelectLog: (log: ErrorLog) => void;
+  isLoading: boolean;
 }
 
 export const FlatLogTable = ({
@@ -23,6 +24,7 @@ export const FlatLogTable = ({
   sorting,
   onSortingChange,
   onSelectLog,
+  isLoading,
 }: FlatLogTableProps) => {
   const table = useReactTableEx({
     data: rows,
@@ -32,9 +34,16 @@ export const FlatLogTable = ({
   });
 
   return (
-    <TableCard>
-      <CommonTable table={table} onRowClick={onSelectLog} />
-      <TablePagination table={table} />
+    <TableCard
+      isLoading={isLoading}
+      loadingLabel="에러 로그를 불러오는 중입니다."
+    >
+      <CommonTable
+        table={table}
+        onRowClick={onSelectLog}
+        isLoading={isLoading}
+      />
+      {!isLoading && <TablePagination table={table} />}
     </TableCard>
   );
 };

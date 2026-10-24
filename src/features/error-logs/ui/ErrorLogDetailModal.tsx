@@ -1,5 +1,4 @@
 import { cn } from "@/shared/utils";
-import { Loading } from "@/widgets/loading";
 import { CircleAlert, X } from "lucide-react";
 import { useStackTrace } from "../hooks/use-stack-trace";
 import { ErrorLog } from "../models/types";
@@ -42,10 +41,6 @@ export const ErrorLogDetailModal = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  if (isPending) {
-    return <Loading />;
-  }
-
   // "System.NullReferenceException" → 네임스페이스는 작게, 타입 이름은 크게
   const typeDot = log.exceptionType.lastIndexOf(".");
   const exceptionNs = log.exceptionType.slice(0, typeDot + 1);
@@ -60,7 +55,7 @@ export const ErrorLogDetailModal = ({
 
   return (
     <div
-      className="fixed inset-0 top-0 z-10 flex items-center justify-center bg-black bg-opacity-50 duration-200 animate-in fade-in"
+      className="fixed inset-0 top-0 z-30 flex items-center justify-center bg-black bg-opacity-50 duration-200 animate-in fade-in"
       onClick={onClose}
     >
       <div
@@ -140,6 +135,7 @@ export const ErrorLogDetailModal = ({
             lines={stackLines}
             rawText={stackTrace ?? ""}
             loadFailed={isError}
+            isLoading={isPending}
           />
         </div>
 

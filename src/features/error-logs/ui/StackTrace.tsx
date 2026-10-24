@@ -1,4 +1,5 @@
 import { cn } from "@/shared/utils";
+import { Skeleton } from "@/widgets/loading";
 import { ArrowRight, Check, ChevronDown, Copy } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { frameLabel, StackFrame, StackLine } from "../utils/parse-stack-trace";
@@ -84,12 +85,17 @@ interface StackTraceViewProps {
   rawText: string;
   /** 스택 조회 요청이 실패했는지 (스택이 없는 경우와 구분) */
   loadFailed: boolean;
+  isLoading: boolean;
 }
+
+// 스택을 받는 동안 보일 줄 길이
+const SKELETON_LINES = ["64%", "52%", "71%", "46%", "58%"];
 
 export const StackTraceView = ({
   lines,
   rawText,
   loadFailed,
+  isLoading,
 }: StackTraceViewProps) => {
   const [showFramework, setShowFramework] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
@@ -154,7 +160,18 @@ export const StackTraceView = ({
       </div>
 
       <div className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
-        {frames.length === 0 ? (
+        {isLoading ? (
+          <div role="status" className="flex flex-col gap-3 p-3">
+            {SKELETON_LINES.map((width) => (
+              <Skeleton
+                key={width}
+                className="h-3 bg-slate-200"
+                width={width}
+              />
+            ))}
+            <span className="sr-only">스택 트레이스를 불러오는 중입니다.</span>
+          </div>
+        ) : frames.length === 0 ? (
           // 형식을 알 수 없는 스택은 원문 그대로 보여준다
           <pre className="whitespace-pre-wrap break-all p-2 font-mono text-[13px] text-slate-700">
             {rawText ||

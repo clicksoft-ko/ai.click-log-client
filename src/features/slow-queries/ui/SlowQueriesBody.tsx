@@ -1,6 +1,6 @@
 import { useCsNames } from "@/features/_common";
 import { SearchFilter, useSearchFilter } from "@/widgets/filters";
-import { Loading } from "@/widgets/loading";
+import { SkeletonRows } from "@/widgets/loading";
 import {
   countByHour,
   futureHourFrom,
@@ -102,12 +102,15 @@ const SlowQueriesBody = () => {
     setPageIndex(0);
   };
 
+  // 조회 중에는 건수 대신 빈 자리를 둔다 (0건으로 보이지 않게)
+  const count = (value: number) => (isPending ? undefined : value);
+
   const tabs: ViewTab<ViewMode>[] = [
-    { value: "flat", label: "전체 쿼리", count: queries.length },
+    { value: "flat", label: "전체 쿼리", count: count(queries.length) },
     {
       value: "location",
       label: "위치별 묶음",
-      count: summary.locations,
+      count: count(summary.locations),
       title: "어셈블리 · 클래스 · 메서드가 같으면 한 묶음입니다.",
     },
   ];
@@ -126,11 +129,6 @@ const SlowQueriesBody = () => {
 
   return (
     <BodyWrapper>
-      {isPending && (
-        <Loading>
-          <div>슬로우 쿼리를 조회 중입니다.</div>
-        </Loading>
-      )}
       <SearchFilter
         onSearch={mutate}
         isPending={isPending}
@@ -152,6 +150,7 @@ const SlowQueriesBody = () => {
         peakBarClassName="bg-navy"
         futureFrom={futureHourFrom(dateRange)}
         latestAt={queries[0]?.createdAt}
+        isLoading={isPending}
       />
 
       <ViewTabs tabs={tabs} value={view} onChange={changeView}>
@@ -175,12 +174,24 @@ const SlowQueriesBody = () => {
       </ViewTabs>
 
       {view === "flat" && (
-        <TableCard>
-          <CommonTable table={table} onRowClick={selectQuery} />
-          <TablePagination table={table} />
+        <TableCard
+          isLoading={isPending}
+          loadingLabel="슬로우 쿼리를 불러오는 중입니다."
+        >
+          <CommonTable
+            table={table}
+            onRowClick={selectQuery}
+            isLoading={isPending}
+          />
+          {!isPending && <TablePagination table={table} />}
         </TableCard>
       )}
-      {view === "location" && (
+      {view === "location" && isPending && (
+        <TableCard isLoading loadingLabel="슬로우 쿼리를 불러오는 중입니다.">
+          <SkeletonRows />
+        </TableCard>
+      )}
+      {view === "location" && !isPending && (
         <LocationGroupList
           queries={queries}
           hospitalName={hospitalName}

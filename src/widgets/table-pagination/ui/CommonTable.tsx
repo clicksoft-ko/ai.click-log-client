@@ -1,4 +1,5 @@
 import { cn } from "@/shared/utils";
+import { LoadingBar, Skeleton } from "@/widgets/loading";
 import { flexRender, RowData, Table } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -13,9 +14,19 @@ declare module "@tanstack/react-table" {
 interface CommonTableProps<T> {
   table: Table<T>;
   onRowClick: (data: T) => void;
+  /** 조회 중이면 머리글은 두고 행 자리에 빈 막대를 보인다 */
+  isLoading?: boolean;
 }
 
-export const CommonTable = <T,>({ table, onRowClick }: CommonTableProps<T>) => {
+const SKELETON_ROWS = 10;
+// 칸마다 길이를 조금씩 달리해 실제 표처럼 보이게 한다
+const SKELETON_WIDTHS = ["72%", "54%", "86%", "62%", "44%", "78%", "58%"];
+
+export const CommonTable = <T,>({
+  table,
+  onRowClick,
+  isLoading = false,
+}: CommonTableProps<T>) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse text-[13px]">
@@ -68,45 +79,78 @@ export const CommonTable = <T,>({ table, onRowClick }: CommonTableProps<T>) => {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              onClick={() => onRowClick(row.original)}
-              className="h-9 cursor-pointer hover:bg-panel"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  className={cn(
-                    "whitespace-nowrap border-b border-line-soft px-3 py-1 align-middle first:pl-4 last:pr-4",
-                    cell.column.columnDef.meta?.className,
-                  )}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {isLoading && <SkeletonBody table={table} />}
+          {!isLoading &&
+            table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                onClick={() => onRowClick(row.original)}
+                className="h-9 cursor-pointer hover:bg-panel"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className={cn(
+                      "whitespace-nowrap border-b border-line-soft px-3 py-1 align-middle first:pl-4 last:pr-4",
+                      cell.column.columnDef.meta?.className,
+                    )}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
   );
 };
 
+const SkeletonBody = <T,>({ table }: { table: Table<T> }) => {
+  const columns = table.getVisibleLeafColumns();
+  return Array.from({ length: SKELETON_ROWS }, (_, row) => (
+    <tr key={row} aria-hidden className="h-9">
+      {columns.map((column, col) => (
+        <td
+          key={column.id}
+          className="border-b border-line-soft px-3 py-1 first:pl-4 last:pr-4"
+        >
+          <Skeleton
+            className="h-3"
+            width={SKELETON_WIDTHS[(row * 3 + col) % SKELETON_WIDTHS.length]}
+          />
+        </td>
+      ))}
+    </tr>
+  ));
+};
+
 /** 표와 페이지 나누기를 한 판으로 묶는 테두리 */
 export const TableCard = ({
   children,
   className,
+  isLoading = false,
+  loadingLabel = "불러오는 중입니다.",
 }: {
   children: React.ReactNode;
   className?: string;
+  /** 조회 중이면 위 가장자리에 진행 막대를 띄운다 */
+  isLoading?: boolean;
+  loadingLabel?: string;
 }) => (
   <div
+    aria-busy={isLoading}
     className={cn(
-      "overflow-hidden rounded-[10px] border border-line bg-white",
+      "relative overflow-hidden rounded-[10px] border border-line bg-white",
       className,
     )}
   >
+    {isLoading && (
+      <div role="status" className="absolute inset-x-0 top-0 z-10">
+        <LoadingBar />
+        <span className="sr-only">{loadingLabel}</span>
+      </div>
+    )}
     {children}
   </div>
 );

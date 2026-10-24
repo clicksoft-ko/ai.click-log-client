@@ -1,6 +1,6 @@
 import { DatePickerRange } from "@/widgets/date-range-picker";
 import { SearchTagInput } from "@/widgets/search-tag-input";
-import { Search } from "lucide-react";
+import { LoaderCircle, Search } from "lucide-react";
 import { useSearchFilter } from "../context/SearchFilterContext";
 
 interface SearchFilterProps {
@@ -47,9 +47,16 @@ export const SearchFilter = ({
       <button
         onClick={onSearch}
         disabled={isPending}
-        className="h-9 rounded-md bg-navy px-4 text-[13px] font-semibold text-white hover:bg-navy-2 disabled:opacity-50"
+        className="inline-flex h-9 min-w-[76px] items-center justify-center gap-1.5 rounded-md bg-navy px-4 text-[13px] font-semibold text-white hover:bg-navy-2 disabled:bg-navy-2 disabled:text-white/80"
       >
-        조회
+        {isPending && (
+          <LoaderCircle
+            size={14}
+            aria-hidden
+            className="motion-safe:animate-spin"
+          />
+        )}
+        {isPending ? "조회 중" : "조회"}
       </button>
       <SearchTagInput
         tags={tags}
